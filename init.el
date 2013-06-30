@@ -296,3 +296,7 @@ returned."
 
 (eval-after-load "flycheck"
   '(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode))
+
+(eval-after-load "mumamo"
+  '(setq mumamo-per-buffer-local-vars
+	 (delq 'buffer-file-name mumamo-per-buffer-local-vars)))
