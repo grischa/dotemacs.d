@@ -16,36 +16,61 @@
  '(vc-annotate-color-map (quote ((20 . "#bc8383") (40 . "#cc9393") (60 . "#dfaf8f") (80 . "#d0bf8f") (100 . "#e0cf9f") (120 . "#f0dfaf") (140 . "#5f7f5f") (160 . "#7f9f7f") (180 . "#8fb28f") (200 . "#9fc59f") (220 . "#afd8af") (240 . "#bfebbf") (260 . "#93e0e3") (280 . "#6ca0a3") (300 . "#7cb8bb") (320 . "#8cd0d3") (340 . "#94bff3") (360 . "#dc8cc3"))))
  '(vc-annotate-very-old-color "#dc8cc3"))
 
-;; package-activated-list(
-;; flymake-cursor
-;; ibuffer-vc
-;; python-mode
-;; autopair
-;; exec-path-from-shell
-;; flycheck
+(require 'package)
+(setq package-archives 
+      '(("gnu" . "http://elpa.gnu.org/packages/")
+	("marmalade" . "http://marmalade-repo.org/packages/")
+	("melpa" . "http://melpa.milkbox.net/packages/")))
+
+(package-initialize)
+(when (not package-archive-contents)
+  (package-refresh-contents))
+
+(mapc
+ (lambda (package)
+   (or (package-installed-p package)
+       (package-install package)))
+ '(flycheck
+   google-this
+   python-mode
+   diff-hl
+   magit
+   ibuffer-vc))
 ;; dash
-;; google-this
+;; autopair))
+;; flymake-cursor
+;; exec-path-from-shell
 ;; s
 ;; zenburn-theme)
 ;;;; el-get packages
-;; auto-complete
+(setq my:el-get-packages
+      '(auto-complete
+	fill-column-indicator
+	fuzzy
+	highlight-indentation
+	jedi
+	pymacs
+	rope
+	ropemacs
+	ropemode
+	yaml-mode
+	nxhtml))
 ;; ctable
 ;; deferred
 ;; el-get
 ;; epc
-;; fill-column-indicator
 ;; flymake-cursor
-;; fuzzy
-;; highlight-indentation
-;; ibuffer-vc
-;; jedi
 ;; package
 ;; popup
-;; pymacs
-;; rope
-;; ropemacs
-;; ropemode
-;; yaml-mode
+(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+(unless (require 'el-get nil 'noerror)
+  (with-current-buffer
+      (url-retrieve-synchronously
+       "https://raw.github.com/dimitri/el-get/master/el-get-install.el")
+    (let (el-get-master-branch)
+      (goto-char (point-max))
+      (eval-print-last-sexp))))
+(el-get 'sync my:el-get-packages)
 
 (defun find-parent-with-file (path filename)
   "Traverse PATH upwards until we find FILENAME in the dir.
@@ -98,12 +123,6 @@ returned."
              (local-set-key (kbd "C-c d") 'jedi:show-doc)
              (local-set-key (kbd "C-<tab>") 'jedi:complete)))
 
-(require 'package)
-(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                         ("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")))
-
-(package-initialize)
 
 (when (memq window-system '(mac ns))
   (exec-path-from-shell-initialize))
@@ -130,16 +149,6 @@ returned."
 (add-hook 'auto-save-hook 'my-desktop-save)
 
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
-(unless (require 'el-get nil 'noerror)
-  (with-current-buffer
-      (url-retrieve-synchronously
-       "https://raw.github.com/dimitri/el-get/master/el-get-install.el")
-    (let (el-get-master-branch)
-      (goto-char (point-max))
-      (eval-print-last-sexp))))
-(el-get 'sync)
 
 (server-start)
 
@@ -176,7 +185,6 @@ returned."
 (load-file "~/.emacs.d/diff-hl.el")
 (add-hook 'python-mode-hook 'turn-on-diff-hl-mode)
 
-(add-to-list 'load-path "~/.emacs.d/magit-1.2.0")
 (require 'magit)
 
 (custom-set-faces
