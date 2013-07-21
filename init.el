@@ -16,6 +16,9 @@
  '(vc-annotate-color-map (quote ((20 . "#bc8383") (40 . "#cc9393") (60 . "#dfaf8f") (80 . "#d0bf8f") (100 . "#e0cf9f") (120 . "#f0dfaf") (140 . "#5f7f5f") (160 . "#7f9f7f") (180 . "#8fb28f") (200 . "#9fc59f") (220 . "#afd8af") (240 . "#bfebbf") (260 . "#93e0e3") (280 . "#6ca0a3") (300 . "#7cb8bb") (320 . "#8cd0d3") (340 . "#94bff3") (360 . "#dc8cc3"))))
  '(vc-annotate-very-old-color "#dc8cc3"))
 
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+(autoload 'ibuffer "ibuffer" "List buffers." t)
+
 (require 'package)
 (setq package-archives 
       '(("gnu" . "http://elpa.gnu.org/packages/")
@@ -35,7 +38,8 @@
    python-mode
    diff-hl
    magit
-   ibuffer-vc))
+   ibuffer-vc
+   dart-mode))
 ;; dash
 ;; autopair))
 ;; flymake-cursor
@@ -270,9 +274,6 @@ returned."
 ;;(setq py-split-windows-on-execute-p nil)
 ; try to automagically figure out indentation
 ;;(setq py-smart-indentation t)
-
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-(autoload 'ibuffer "ibuffer" "List buffers." t)
 
 (add-hook 'ibuffer-hook
 	  (lambda ()
