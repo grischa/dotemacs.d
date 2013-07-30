@@ -10,6 +10,7 @@
  '(flycheck-highlighting-mode (quote lines))
  '(inhibit-startup-screen t)
  '(nxhtml-autoload-web nil)
+ '(safe-local-variable-values (quote ((virtualenv-default-directory . "~/Documents/websites/gernotmeyer.de") (virtualenv-workon . "~/Documents/websites/gernotmeyer.de/env") (virtualenv-default-directory . "") (virtualenv-workon . "env"))))
  '(show-paren-mode t)
  '(tool-bar-mode nil)
  '(vc-annotate-background "#2b2b2b")
@@ -19,8 +20,30 @@
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 (autoload 'ibuffer "ibuffer" "List buffers." t)
 
+(add-hook 'ibuffer-hook
+	  (lambda ()
+	    (ibuffer-vc-set-filter-groups-by-vc-root)
+	    (unless (eq ibuffer-sorting-mode 'alphabetic)
+	      (ibuffer-do-sort-by-alphabetic))))
+
+(add-hook 'after-init-hook #'global-flycheck-mode)
+(setq flycheck-flake8-maximum-complexity 7)
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(flycheck-error-face ((t (:background "brown4"))) t)
+ '(flycheck-warning-face ((t (:background "chocolate4"))) t)
+ '(flymake-errline ((((class color)) (:underline "red"))))
+ '(flymake-warnline ((((class color)) (:underline "yellow")))))
+
+(eval-after-load "flycheck"
+  '(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode))
+
 (require 'package)
-(setq package-archives 
+(setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
 	("marmalade" . "http://marmalade-repo.org/packages/")
 	("melpa" . "http://melpa.milkbox.net/packages/")))
@@ -39,7 +62,12 @@
    diff-hl
    magit
    ibuffer-vc
-   dart-mode))
+   dart-mode
+;;   less-css-mode
+   python-django
+   flycheck-color-mode-line
+;;   virtualenv
+))
 ;; dash
 ;; autopair))
 ;; flymake-cursor
@@ -58,7 +86,8 @@
 	ropemacs
 	ropemode
 	yaml-mode
-	nxhtml))
+	nxhtml
+	))
 ;; ctable
 ;; deferred
 ;; el-get
@@ -156,18 +185,8 @@ returned."
 
 (server-start)
 
-(add-hook 'after-init-hook #'global-flycheck-mode)
-(setq flycheck-flake8-maximum-complexity 7)
 
 ;;(autopair-global-mode t)
-
-;;(add-to-list 'load-path "~/.emacs.d/")
-
-;;(load-file "~/.emacs.d/emacs-for-python/epy-init.el")
-
-;;(epy-setup-checker "~/.emacs.d/pycheckers %f")
-;;(epy-django-snippets)
-;;(epy-setup-ipython)
 
 ;;(require 'highlight-indentation)
 ;;(add-hook 'python-mode-hook 'highlight-indentation)
@@ -178,72 +197,18 @@ returned."
 (autoload 'js2-mode "js2" nil t)
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
 
-;; nxhtml
-(load "~/.emacs.d/nxhtml/autostart")
-
 (setq ido-use-filename-at-point 'guess)
 
 (require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.sls$" . yaml-mode))
 
-(load-file "~/.emacs.d/diff-hl.el")
 (add-hook 'python-mode-hook 'turn-on-diff-hl-mode)
 
 (require 'magit)
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :weight light :height 140 :family "Source Code Pro"))))
- '(flycheck-error-face ((t (:background "brown4"))))
- '(flycheck-warning-face ((t (:background "chocolate4"))))
- '(flymake-errline ((((class color)) (:underline "red"))))
- '(flymake-warnline ((((class color)) (:underline "yellow")))))
-
 (add-hook 'server-visit-hook 'call-raise-frame)
 (defun call-raise-frame ()
   (raise-frame))
-
-;; ;; flymake with buildout
-;; ;; from https://bitbucket.org/runeh/dotfiles/src/e686525f6cca/dotemacs/dotemacs
-;; ;; add epylint to buildout:
-;; ;; http://stackoverflow.com/questions/10001205/epylint-in-emacs-using-virtualenv
-;; (require 'flymake)
-;; (load-library "flymake-cursor")
-;; (setq flymake-start-syntax-check-on-newline nil)
-;; (add-hook 'find-file-hook 'flymake-find-file-hook)
-;; (global-set-key "\C-c\C-j"  'flymake-goto-next-error)
-;; (global-set-key "\C-c\C-k"  'flymake-goto-prev-error)
-
-;; ;; Look for buildout dir with epylint
-;; (setq pyflymake-buildout-paths (list "bin/epylint"))
-
-;; (defun pyflymake-find-buildout (filename)
-;;   "Finds buildout dir"
-;;   (if (string= filename "/")
-;;       "epylint"
-;;     (let (buildout)
-;;       (dolist (path pyflymake-buildout-paths)
-;;         (if (file-exists-p (concat filename path))
-;;             (setq buildout (concat filename path))))
-;;       (message buildout)
-;;       (or buildout
-;;           (pyflymake-find-buildout (file-name-directory
-;;                                     (directory-file-name filename)))))))
-
-;; (defun flymake-pylint-init ()
-;;   (if (not (file-writable-p (file-name-directory buffer-file-name)))
-;;       nil
-;;     (list (pyflymake-find-buildout buffer-file-name)
-;;           (list (file-relative-name
-;;                  (flymake-init-create-temp-buffer-copy 'flymake-create-temp-inplace)
-;;                  (file-name-directory buffer-file-name))))))
-
-
-;; (add-to-list 'flymake-allowed-file-name-masks
-;;              '("\\.py\\'" flymake-pylint-init))
 
 (add-hook 'python-mode-hook (lambda () (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
 
@@ -275,12 +240,6 @@ returned."
 ; try to automagically figure out indentation
 ;;(setq py-smart-indentation t)
 
-(add-hook 'ibuffer-hook
-	  (lambda ()
-	    (ibuffer-vc-set-filter-groups-by-vc-root)
-	    (unless (eq ibuffer-sorting-mode 'alphabetic)
-	      (ibuffer-do-sort-by-alphabetic))))
-
 (setq require-final-newline t)
 
 (setq tramp-default-method "ssh")
@@ -299,12 +258,7 @@ returned."
 
 (add-hook 'python-mode-hook 'jedi:setup)
 
-(add-to-list 'load-path "~/.emacs.d/")
-
 (require 'flycheck-color-mode-line)
-
-(eval-after-load "flycheck"
-  '(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode))
 
 (eval-after-load "mumamo"
   '(setq mumamo-per-buffer-local-vars
