@@ -34,10 +34,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(flycheck-error-face ((t (:background "brown4"))) t)
- '(flycheck-warning-face ((t (:background "chocolate4"))) t)
- '(flymake-errline ((((class color)) (:underline "red"))))
- '(flymake-warnline ((((class color)) (:underline "yellow")))))
+ '(flycheck-error ((t (:underline "red4"))))
+ '(flycheck-fringe-error ((t nil)))
+ '(flycheck-fringe-warning ((t nil)))
+ '(flycheck-warning ((t (:underline "dark orange")))))
 
 (eval-after-load "flycheck"
   '(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode))
@@ -66,7 +66,7 @@
 ;;   less-css-mode
    python-django
    flycheck-color-mode-line
-;;   virtualenv
+   virtualenv
 ))
 ;; dash
 ;; autopair))
@@ -76,7 +76,8 @@
 ;; zenburn-theme)
 ;;;; el-get packages
 (setq my:el-get-packages
-      '(auto-complete
+      '(python
+	auto-complete
 	fill-column-indicator
 	fuzzy
 	highlight-indentation
@@ -132,11 +133,10 @@ returned."
 	 (list bin jedi:server-script))))
 (add-hook 'python-mode-hook 'check-jedi-python)
 
-
 (setq jedi:setup-keys nil)
 ;; (setq jedi:tooltip-method nil)
- (autoload 'jedi:setup "jedi" nil t)
- (add-hook 'python-mode-hook 'jedi:setup)
+(autoload 'jedi:setup "jedi" nil t)
+(add-hook 'python-mode-hook 'jedi:setup)
 (defvar jedi:goto-stack '())
 (defun jedi:jump-to-definition ()
   (interactive)
