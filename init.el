@@ -6,8 +6,9 @@
  '(custom-enabled-themes (quote (wombat)))
  '(custom-safe-themes (quote ("4dacec7215677e4a258e4529fac06e0231f7cdd54e981d013d0d0ae0af63b0c8" default)))
  '(fci-rule-color "#383838")
- '(flycheck-flake8-maximum-complexity 8)
+ '(flycheck-flake8-maximum-complexity 9)
  '(flycheck-highlighting-mode (quote lines))
+ '(ibuffer-formats (quote ((mark modified read-only vc-status-mini " " (name 18 18 :left :elide) " " (size 9 -1 :right) " " (mode 16 16 :left :elide) " " filename-and-process) (mark " " (name 16 -1) " " filename))))
  '(inhibit-startup-screen t)
  '(nxhtml-autoload-web nil)
  '(safe-local-variable-values (quote ((python-shell-virtualenv-path . "~/Documents/websites/gernotmeyer.de/env") (virtualenv-default-directory . "~/Documents/websites/gernotmeyer.de") (virtualenv-workon . "~/Documents/websites/gernotmeyer.de/env") (virtualenv-default-directory . "") (virtualenv-workon . "env"))))
@@ -17,6 +18,7 @@
  '(vc-annotate-color-map (quote ((20 . "#bc8383") (40 . "#cc9393") (60 . "#dfaf8f") (80 . "#d0bf8f") (100 . "#e0cf9f") (120 . "#f0dfaf") (140 . "#5f7f5f") (160 . "#7f9f7f") (180 . "#8fb28f") (200 . "#9fc59f") (220 . "#afd8af") (240 . "#bfebbf") (260 . "#93e0e3") (280 . "#6ca0a3") (300 . "#7cb8bb") (320 . "#8cd0d3") (340 . "#94bff3") (360 . "#dc8cc3"))))
  '(vc-annotate-very-old-color "#dc8cc3"))
 
+(define-key global-map (kbd "RET") 'newline-and-indent)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 (autoload 'ibuffer "ibuffer" "List buffers." t)
 
@@ -56,24 +58,27 @@
  (lambda (package)
    (or (package-installed-p package)
        (package-install package)))
- '(flycheck
+ '(exec-path-from-shell
+   flycheck
    google-this
+   autopair
+   dash
    python-mode
    diff-hl
    magit
    ibuffer-vc
    dart-mode
+   s
+   zenburn-theme
 ;;   less-css-mode
    python-django
    flycheck-color-mode-line
    virtualenv
 ))
-;; dash
-;; autopair))
-;; flymake-cursor
-;; exec-path-from-shell
-;; s
-;; zenburn-theme)
+
+(when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize))
+
 ;;;; el-get packages
 (setq my:el-get-packages
       '(python
@@ -88,14 +93,13 @@
 	ropemode
 	yaml-mode
 	nxhtml
+        epc
+	ctable
+	deferred
+	helm
+	popup
+	smooth-scroll
 	))
-;; ctable
-;; deferred
-;; el-get
-;; epc
-;; flymake-cursor
-;; package
-;; popup
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 (unless (require 'el-get nil 'noerror)
   (with-current-buffer
@@ -157,9 +161,6 @@ returned."
              (local-set-key (kbd "C-<tab>") 'jedi:complete)))
 
 
-(when (memq window-system '(mac ns))
-  (exec-path-from-shell-initialize))
-
 ;;(load-theme 'zenburn t)
 
 ;; ido mode
@@ -185,6 +186,8 @@ returned."
 
 (server-start)
 
+(add-hook 'after-init-hook #'global-flycheck-mode)
+(setq flycheck-flake8-maximum-complexity 9)
 
 ;;(autopair-global-mode t)
 
@@ -205,6 +208,17 @@ returned."
 (add-hook 'python-mode-hook 'turn-on-diff-hl-mode)
 
 (require 'magit)
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:inherit nil :weight light :height 140 :family "Source Code Pro"))))
+ '(flycheck-error-face ((t (:background "brown4"))))
+ '(flycheck-warning-face ((t (:background "chocolate4"))))
+ '(flymake-errline ((((class color)) (:underline "red"))))
+ '(flymake-warnline ((((class color)) (:underline "yellow")))))
 
 (add-hook 'server-visit-hook 'call-raise-frame)
 (defun call-raise-frame ()
@@ -240,6 +254,15 @@ returned."
 ; try to automagically figure out indentation
 ;;(setq py-smart-indentation t)
 
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+(autoload 'ibuffer "ibuffer" "List buffers." t)
+
+(add-hook 'ibuffer-hook
+	  (lambda ()
+	    (ibuffer-vc-set-filter-groups-by-vc-root)
+	    (unless (eq ibuffer-sorting-mode 'alphabetic)
+	      (ibuffer-do-sort-by-alphabetic))))
+
 (setq require-final-newline t)
 
 (setq tramp-default-method "ssh")
@@ -260,6 +283,23 @@ returned."
 
 (require 'flycheck-color-mode-line)
 
+(eval-after-load "flycheck"
+  '(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode))
+
 (eval-after-load "mumamo"
   '(setq mumamo-per-buffer-local-vars
 	 (delq 'buffer-file-name mumamo-per-buffer-local-vars)))
+
+;;(set-frame-parameter (selected-frame) 'alpha '(<active> [<inactive>]))
+ (set-frame-parameter (selected-frame) 'alpha '(96 90))
+ (add-to-list 'default-frame-alist '(alpha 96 90))
+
+(eval-when-compile (require 'cl))
+ (defun toggle-transparency ()
+   (interactive)
+   (if (/=
+        (cadr (frame-parameter nil 'alpha))
+        100)
+       (set-frame-parameter nil 'alpha '(100 100))
+     (set-frame-parameter nil 'alpha '(96 90))))
+ (global-set-key (kbd "C-c t") 'toggle-transparency)
