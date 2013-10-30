@@ -10,7 +10,7 @@
  '(flycheck-highlighting-mode (quote lines))
  '(inhibit-startup-screen t)
  '(nxhtml-autoload-web nil)
- '(safe-local-variable-values (quote ((virtualenv-default-directory . "~/Documents/websites/gernotmeyer.de") (virtualenv-workon . "~/Documents/websites/gernotmeyer.de/env") (virtualenv-default-directory . "") (virtualenv-workon . "env"))))
+ '(safe-local-variable-values (quote ((python-shell-virtualenv-path . "~/Documents/websites/gernotmeyer.de/env") (virtualenv-default-directory . "~/Documents/websites/gernotmeyer.de") (virtualenv-workon . "~/Documents/websites/gernotmeyer.de/env") (virtualenv-default-directory . "") (virtualenv-workon . "env"))))
  '(show-paren-mode t)
  '(tool-bar-mode nil)
  '(vc-annotate-background "#2b2b2b")
