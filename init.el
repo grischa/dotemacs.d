@@ -10,13 +10,14 @@
  '(flycheck-highlighting-mode (quote lines))
  '(ibuffer-formats (quote ((mark modified read-only vc-status-mini " " (name 18 18 :left :elide) " " (size 9 -1 :right) " " (mode 16 16 :left :elide) " " filename-and-process) (mark " " (name 16 -1) " " filename))))
  '(inhibit-startup-screen t)
- '(nxhtml-autoload-web nil)
+;; '(nxhtml-autoload-web nil)
  '(safe-local-variable-values (quote ((python-shell-virtualenv-path . "~/Documents/websites/gernotmeyer.de/env") (virtualenv-default-directory . "~/Documents/websites/gernotmeyer.de") (virtualenv-workon . "~/Documents/websites/gernotmeyer.de/env") (virtualenv-default-directory . "") (virtualenv-workon . "env"))))
  '(show-paren-mode t)
  '(tool-bar-mode nil)
  '(vc-annotate-background "#2b2b2b")
  '(vc-annotate-color-map (quote ((20 . "#bc8383") (40 . "#cc9393") (60 . "#dfaf8f") (80 . "#d0bf8f") (100 . "#e0cf9f") (120 . "#f0dfaf") (140 . "#5f7f5f") (160 . "#7f9f7f") (180 . "#8fb28f") (200 . "#9fc59f") (220 . "#afd8af") (240 . "#bfebbf") (260 . "#93e0e3") (280 . "#6ca0a3") (300 . "#7cb8bb") (320 . "#8cd0d3") (340 . "#94bff3") (360 . "#dc8cc3"))))
- '(vc-annotate-very-old-color "#dc8cc3"))
+ '(vc-annotate-very-old-color "#dc8cc3")
+ '(web-mode-enable-current-element-highlight t))
 
 (define-key global-map (kbd "RET") 'newline-and-indent)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
@@ -28,8 +29,8 @@
 	    (unless (eq ibuffer-sorting-mode 'alphabetic)
 	      (ibuffer-do-sort-by-alphabetic))))
 
-(add-hook 'after-init-hook #'global-flycheck-mode)
-(setq flycheck-flake8-maximum-complexity 7)
+;;(add-hook 'after-init-hook #'global-flycheck-mode)
+(setq flycheck-flake8-maximum-complexity 9)
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -67,14 +68,17 @@
    diff-hl
    magit
    ibuffer-vc
-   dart-mode
+;;   dart-mode
    s
    zenburn-theme
 ;;   less-css-mode
    python-django
    flycheck-color-mode-line
    virtualenv
-))
+   elnode
+;;   org-trello
+   web-mode
+   ))
 
 (when (memq window-system '(mac ns))
   (exec-path-from-shell-initialize))
@@ -82,6 +86,7 @@
 ;;;; el-get packages
 (setq my:el-get-packages
       '(python
+	popup
 	auto-complete
 	fill-column-indicator
 	fuzzy
@@ -92,7 +97,7 @@
 	ropemacs
 	ropemode
 	yaml-mode
-	nxhtml
+;;	nxhtml
         epc
 	ctable
 	deferred
@@ -186,8 +191,8 @@ returned."
 
 (server-start)
 
-(add-hook 'after-init-hook #'global-flycheck-mode)
-(setq flycheck-flake8-maximum-complexity 9)
+;;(add-hook 'after-init-hook #'global-flycheck-mode)
+(add-hook 'python-mode-hook 'flycheck-mode)
 
 ;;(autopair-global-mode t)
 
@@ -232,11 +237,13 @@ returned."
 (global-set-key (kbd "C-x g") 'google-this-mode-submap)
 
 (require 'fill-column-indicator)
-(define-globalized-minor-mode
- global-fci-mode fci-mode (lambda () (fci-mode 1)))
-(setq-default fci-rule-column 79)
-(global-fci-mode t)
+(setq-default fci-rule-column 80)
 (setq-default fill-column 78)
+(add-hook 'python-mode-hook 'fci-mode)
+(add-hook 'emacs-lisp-mode-hook 'fci-mode)
+;; (define-globalized-minor-mode
+;;  global-fci-mode fci-mode (lambda () (fci-mode 1)))
+;; (global-fci-mode t)
 
 ;; ipython
 ;;(setq-default py-shell-name "ipython")
@@ -286,9 +293,9 @@ returned."
 (eval-after-load "flycheck"
   '(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode))
 
-(eval-after-load "mumamo"
-  '(setq mumamo-per-buffer-local-vars
-	 (delq 'buffer-file-name mumamo-per-buffer-local-vars)))
+;; (eval-after-load "mumamo"
+;;   '(setq mumamo-per-buffer-local-vars
+;; 	 (delq 'buffer-file-name mumamo-per-buffer-local-vars)))
 
 ;;(set-frame-parameter (selected-frame) 'alpha '(<active> [<inactive>]))
  (set-frame-parameter (selected-frame) 'alpha '(96 90))
@@ -303,3 +310,23 @@ returned."
        (set-frame-parameter nil 'alpha '(100 100))
      (set-frame-parameter nil 'alpha '(96 90))))
  (global-set-key (kbd "C-c t") 'toggle-transparency)
+
+(add-to-list 'load-path "~/.emacs.d/dart-mode/")
+(require 'dart-mode)
+
+(require 'web-mode)
+(add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.[gj]sp\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+
+(setq web-mode-engines-alist
+      '(("django"    . "\\.html\\'")
+        ("blade"  . "\\.blade\\."))
+)
+(setq web-mode-style-padding 0)
+(setq web-mode-script-padding 0)
