@@ -10,8 +10,6 @@
  '(flycheck-highlighting-mode (quote lines))
  '(ibuffer-formats (quote ((mark modified read-only vc-status-mini " " (name 18 18 :left :elide) " " (size 9 -1 :right) " " (mode 16 16 :left :elide) " " filename-and-process) (mark " " (name 16 -1) " " filename))))
  '(inhibit-startup-screen t)
-;; '(nxhtml-autoload-web nil)
- '(safe-local-variable-values (quote ((python-shell-virtualenv-path . "~/Documents/websites/gernotmeyer.de/env") (virtualenv-default-directory . "~/Documents/websites/gernotmeyer.de") (virtualenv-workon . "~/Documents/websites/gernotmeyer.de/env") (virtualenv-default-directory . "") (virtualenv-workon . "env"))))
  '(show-paren-mode t)
  '(tool-bar-mode nil)
  '(vc-annotate-background "#2b2b2b")
@@ -37,10 +35,15 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(default ((t (:inherit nil :weight light :height 140 :family "Source Code Pro"))))
  '(flycheck-error ((t (:underline "red4"))))
+ '(flycheck-error-face ((t (:background "brown4"))))
  '(flycheck-fringe-error ((t nil)))
  '(flycheck-fringe-warning ((t nil)))
- '(flycheck-warning ((t (:underline "dark orange")))))
+ '(flycheck-warning ((t (:underline "dark orange"))))
+ '(flycheck-warning-face ((t (:background "chocolate4"))))
+ '(flymake-errline ((((class color)) (:underline "red"))))
+ '(flymake-warnline ((((class color)) (:underline "yellow")))))
 
 (eval-after-load "flycheck"
   '(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode))
@@ -48,7 +51,7 @@
 (require 'package)
 (setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
-	("marmalade" . "http://marmalade-repo.org/packages/")
+	;;("marmalade" . "http://marmalade-repo.org/packages/")
 	("melpa" . "http://melpa.milkbox.net/packages/")))
 
 (package-initialize)
@@ -65,6 +68,7 @@
    autopair
    dash
    python-mode
+   jedi
    diff-hl
    magit
    ibuffer-vc
@@ -75,6 +79,7 @@
    python-django
    flycheck-color-mode-line
    virtualenv
+   virtualenvwrapper
    elnode
 ;;   org-trello
    web-mode
@@ -91,7 +96,6 @@
 	fill-column-indicator
 	fuzzy
 	highlight-indentation
-	jedi
 	pymacs
 	rope
 	ropemacs
@@ -135,6 +139,9 @@ returned."
 	 (bin-path (concat buildout-directory "bin/" exec)))
     (if (file-exists-p bin-path) bin-path exec)))
 
+(add-hook 'python-mode-hook (lambda ()
+                              (hack-local-variables)
+                              (venv-workon project-venv-name)))
 (defun check-jedi-python ()
   "Update the path to python for jedi-mode if we switch to a Buildout project."
   (let ((bin (buildout-find-bin "python")))
@@ -214,16 +221,7 @@ returned."
 
 (require 'magit)
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :weight light :height 140 :family "Source Code Pro"))))
- '(flycheck-error-face ((t (:background "brown4"))))
- '(flycheck-warning-face ((t (:background "chocolate4"))))
- '(flymake-errline ((((class color)) (:underline "red"))))
- '(flymake-warnline ((((class color)) (:underline "yellow")))))
+
 
 (add-hook 'server-visit-hook 'call-raise-frame)
 (defun call-raise-frame ()
