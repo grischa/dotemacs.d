@@ -328,3 +328,5 @@ returned."
 )
 (setq web-mode-style-padding 0)
 (setq web-mode-script-padding 0)
+
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
