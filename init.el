@@ -5,6 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes (quote (wombat)))
  '(custom-safe-themes (quote ("4dacec7215677e4a258e4529fac06e0231f7cdd54e981d013d0d0ae0af63b0c8" default)))
+ '(dired-omit-files "^\\.?#\\|^\\.$")
  '(fci-rule-color "#383838")
  '(flycheck-flake8-maximum-complexity 9)
  '(flycheck-highlighting-mode (quote lines))
@@ -83,6 +84,8 @@
    elnode
 ;;   org-trello
    web-mode
+   expand-region
+   smartparens
    ))
 
 (when (memq window-system '(mac ns))
@@ -108,6 +111,7 @@
 	helm
 	popup
 	smooth-scroll
+	dired+
 	))
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 (unless (require 'el-get nil 'noerror)
@@ -215,7 +219,7 @@ returned."
 (setq ido-use-filename-at-point 'guess)
 
 (require 'yaml-mode)
-(add-to-list 'auto-mode-alist '("\\.sls$" . yaml-mode))
+(add-to-list 'auto-mode-alist '("\\.sls$" . python-mode))
 
 (add-hook 'python-mode-hook 'turn-on-diff-hl-mode)
 
@@ -330,3 +334,45 @@ returned."
 (setq web-mode-script-padding 0)
 
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+
+(require 'expand-region)
+(global-set-key (kbd "C-/") 'er/expand-region)
+
+(setq-default dired-omit-files-p t)
+
+(require 'smartparens-config)
+(add-hook 'python-mode-hook 'smartparens-mode)
+
+(define-key sp-keymap (kbd "C-.") 'sp-up-sexp)
+(define-key sp-keymap (kbd "C-M-f") 'sp-forward-slurp-sexp)
+(define-key sp-keymap (kbd "C-M-b") 'sp-forward-barf-sexp)
+(define-key sp-keymap (kbd "M-D") 'sp-splice-sexp)
+
+(flycheck-define-checker python-pep8
+  ""
+  :command ("pep8"
+            source)
+  :error-patterns
+  ((error line-start
+          (file-name) ":" line ":" (optional column ":") " "
+          (message "E" (one-or-more digit) (zero-or-more not-newline))
+          line-end)
+   (warning line-start
+            (file-name) ":" line ":" (optional column ":") " "
+            (message (or "F"            ; Pyflakes in Flake8 >= 2.0
+                         "W"            ; Pyflakes in Flake8 < 2.0
+                         "C")           ; McCabe in Flake >= 2.0
+                     (one-or-more digit) (zero-or-more not-newline))
+            line-end)
+   (info line-start
+         (file-name) ":" line ":" (optional column ":") " "
+         (message "N"              ; pep8-naming in Flake8 >= 2.0
+                  (one-or-more digit) (zero-or-more not-newline))
+         line-end)
+   ;; Syntax errors in Flake8 < 2.0, in Flake8 >= 2.0 syntax errors are caught
+   ;; by the E.* pattern above
+   (error line-start (file-name) ":" line ":" (message) line-end))
+  :modes python-mode)
+
+;;(flycheck-add-next-checker 'python-flake8 'python-pylint)
+;;(flycheck-add-next-checker 'python-flake8 'python-pep8)
