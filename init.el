@@ -13,6 +13,7 @@
  '(inhibit-startup-screen t)
  '(show-paren-mode t)
  '(tool-bar-mode nil)
+ '(unicode-fonts-skip-font-groups (quote (decorative low-quality-glyphs)))
  '(vc-annotate-background "#2b2b2b")
  '(vc-annotate-color-map (quote ((20 . "#bc8383") (40 . "#cc9393") (60 . "#dfaf8f") (80 . "#d0bf8f") (100 . "#e0cf9f") (120 . "#f0dfaf") (140 . "#5f7f5f") (160 . "#7f9f7f") (180 . "#8fb28f") (200 . "#9fc59f") (220 . "#afd8af") (240 . "#bfebbf") (260 . "#93e0e3") (280 . "#6ca0a3") (300 . "#7cb8bb") (320 . "#8cd0d3") (340 . "#94bff3") (360 . "#dc8cc3"))))
  '(vc-annotate-very-old-color "#dc8cc3")
@@ -112,6 +113,9 @@
 	popup
 	smooth-scroll
 	dired+
+	projectile
+	font-utils
+	unicode-fonts
 	))
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 (unless (require 'el-get nil 'noerror)
@@ -153,6 +157,15 @@ returned."
 	 (list bin jedi:server-script))))
 (add-hook 'python-mode-hook 'check-jedi-python)
 
+(defun check-pylint-location ()
+  "Update flycheck pylint path for buildout projects"
+  (let ((bin (buildout-find-bin "pylint")))
+    (setq flycheck-python-pylint-executable bin)))
+(add-hook 'python-mode-hook 'check-pylint-location)
+
+(add-hook 'python-mode-hook 'projectile-mode)
+(add-hook 'web-mode-hook 'projectile-mode)
+
 (setq jedi:setup-keys nil)
 ;; (setq jedi:tooltip-method nil)
 (autoload 'jedi:setup "jedi" nil t)
@@ -171,11 +184,10 @@ returned."
             (goto-char (nth 1 p))))))
 (add-hook 'python-mode-hook
           '(lambda ()
-             (local-set-key (kbd "C-.") 'jedi:jump-to-definition)
-             (local-set-key (kbd "C-,") 'jedi:jump-back)
+             (local-set-key (kbd "C-,") 'jedi:jump-to-definition)
+             (local-set-key (kbd "C-<") 'jedi:jump-back)
              (local-set-key (kbd "C-c d") 'jedi:show-doc)
              (local-set-key (kbd "C-<tab>") 'jedi:complete)))
-
 
 ;;(load-theme 'zenburn t)
 
@@ -374,5 +386,34 @@ returned."
    (error line-start (file-name) ":" line ":" (message) line-end))
   :modes python-mode)
 
-;;(flycheck-add-next-checker 'python-flake8 'python-pylint)
+(flycheck-add-next-checker 'python-flake8 'python-pylint)
 ;;(flycheck-add-next-checker 'python-flake8 'python-pep8)
+
+
+(require 'unicode-fonts)
+(unicode-fonts-setup)
+
+(defun toggle-window-split ()
+  (interactive)
+  (if (= (count-windows) 2)
+      (let* ((this-win-buffer (window-buffer))
+	     (next-win-buffer (window-buffer (next-window)))
+	     (this-win-edges (window-edges (selected-window)))
+	     (next-win-edges (window-edges (next-window)))
+	     (this-win-2nd (not (and (<= (car this-win-edges)
+					 (car next-win-edges))
+				     (<= (cadr this-win-edges)
+					 (cadr next-win-edges)))))
+	     (splitter
+	      (if (= (car this-win-edges)
+		     (car (window-edges (next-window))))
+		  'split-window-horizontally
+		'split-window-vertically)))
+	(delete-other-windows)
+	(let ((first-win (selected-window)))
+	  (funcall splitter)
+	  (if this-win-2nd (other-window 1))
+	  (set-window-buffer (selected-window) this-win-buffer)
+	  (set-window-buffer (next-window) next-win-buffer)
+	  (select-window first-win)
+	  (if this-win-2nd (other-window 1))))))
