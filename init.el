@@ -87,6 +87,7 @@
    web-mode
    expand-region
    dockerfile-mode
+   list-utils
    ))
 
 (when (memq window-system '(mac ns))
