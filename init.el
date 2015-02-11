@@ -86,7 +86,7 @@
 ;;   org-trello
    web-mode
    expand-region
-   smartparens
+   dockerfile-mode
    ))
 
 (when (memq window-system '(mac ns))
@@ -116,6 +116,7 @@
 	projectile
 	font-utils
 	unicode-fonts
+	smartparens
 	))
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 (unless (require 'el-get nil 'noerror)
@@ -417,3 +418,5 @@ returned."
 	  (set-window-buffer (next-window) next-win-buffer)
 	  (select-window first-win)
 	  (if this-win-2nd (other-window 1))))))
+
+(setq default-frame-alist '((width . 85) (height . 56) (top . 50) (left . 1000)))
