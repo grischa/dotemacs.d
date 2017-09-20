@@ -2,6 +2,8 @@
  Emacs configuration
 =====================
 
+This is not maintained, as I've switched to spacemacs and other tools
+
 Main focus: Django web development
 
 Usage
